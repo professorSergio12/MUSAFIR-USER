@@ -1,0 +1,10 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    image: professorsergio12/myapp-backend:latest
+
+  worker-server:
+    build:
+      context: ./worker-server
+    image: professorsergio12/myapp-worker-server:latest

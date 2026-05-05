@@ -1,0 +1,68 @@
+name: Deploy Musafir App to EC2
+
+on:
+  push:
+    branches: ["aws-server"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build & Push Images (CI)
+        run: |
+          docker compose -f docker-compose.ci.yml build
+          docker compose -f docker-compose.ci.yml push
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~
+
+            echo "==== Disk usage BEFORE deployment ===="
+            df -h
+
+            if [ ! -d "MUSAFIR-Exommerce" ]; then
+              echo "Cloning repository (aws-server branch)..."
+              git clone -b aws-server https://github.com/professorSergio12/MUSAFIR-Exommerce.git
+            else
+              echo "Updating repository..."
+              cd MUSAFIR-Exommerce
+              git pull origin aws-server
+              cd ..
+            fi
+
+            cd MUSAFIR-Exommerce
+
+            echo "Pruning Docker to free disk space..."
+            docker system prune -af --volumes
+
+            echo "Pulling backend, worker and nginx images..."
+            docker compose -f docker-compose.yml pull backend worker-server nginx || true
+
+            echo "Building frontend with EC2 .env variables..."
+            docker compose -f docker-compose.yml build --no-cache frontend
+
+            echo "Stopping running containers..."
+            docker compose -f docker-compose.yml down --remove-orphans
+
+            echo "Starting containers (frontend → nginx → backend)..."
+            docker compose -f docker-compose.yml up -d
+
+            echo "==== Disk usage AFTER deployment ===="
+            df -h
+
+            echo "Deployment Complete!"

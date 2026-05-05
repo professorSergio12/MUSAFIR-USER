@@ -1,0 +1,89 @@
+# Required GitHub secrets:
+#   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN (Docker Hub access token)
+#   EC2_HOST, EC2_USER (e.g. ec2-user), EC2_SSH_PRIVATE_KEY, EC2_APP_DIR (e.g. /home/ec2-user/app)
+#   VITE_FIREBASE_*, VITE_RAZORPAY_KEY_ID (for frontend build)
+# On EC2: clone this repo, add .env, install Docker + Docker Compose. No AWS/ECR needed.
+name: Build and Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  IMAGE_FRONTEND: musafir-frontend
+  IMAGE_BACKEND: musafir-backend
+  IMAGE_WORKER: musafir-worker
+
+jobs:
+  build-and-push:
+    name: Build and push to Docker Hub
+    runs-on: ubuntu-latest
+    outputs:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push frontend
+        run: |
+          docker build \
+            --build-arg VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }} \
+            --build-arg VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }} \
+            --build-arg VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }} \
+            --build-arg VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }} \
+            --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }} \
+            --build-arg VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }} \
+            --build-arg VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID }} \
+            -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_FRONTEND }}:latest \
+            -f frontend/Dockerfile ./frontend
+          docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_FRONTEND }}:latest
+
+      - name: Build and push backend
+        run: |
+          docker build -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_BACKEND }}:latest -f backend/Dockerfile ./backend
+          docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_BACKEND }}:latest
+
+      - name: Build and push worker
+        run: |
+          docker build -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_WORKER }}:latest -f worker-server/Dockerfile ./worker-server
+          docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_WORKER }}:latest
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+            set -e
+            cd ${{ secrets.EC2_APP_DIR }}
+            pwd
+            ls -la
+            git pull origin main || true
+            echo '${{ secrets.DOCKERHUB_TOKEN }}' | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+          "
