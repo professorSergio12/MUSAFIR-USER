@@ -14,7 +14,7 @@ import Gallery from "./pages/Gallery";
 import About from "./pages/About";
 import User from "./pages/User";
 import ContactUs from "./components/ContactUs";
-import Admin from "./pages/Admin";
+// import Admin from "./pages/Admin";
 function App() {
   return (
     <Router>
@@ -27,7 +27,7 @@ function App() {
         <Route path="/packages/:slug" element={<PackageDetails />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
-        <Route path="/admin/signin" element={<Admin />} />
+        {/* <Route path="/admin/signin" element={<Admin />} /> */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/gallery" element={<Gallery />} />

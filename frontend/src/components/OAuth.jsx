@@ -27,12 +27,8 @@ const OAuth = () => {
 
       googleAuth(data, {
         onSuccess: (res) => {
-          if (res.role === "admin") {
-            window.location.href = "http://localhost:5174";
-          } else {
-            const redirectTo = location.state?.from || "/";
-            navigate(redirectTo, { replace: true });
-          }
+          const redirectTo = location.state?.from || "/";
+          navigate(redirectTo, { replace: true });
         },
 
         onError: (err) => {

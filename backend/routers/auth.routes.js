@@ -8,7 +8,6 @@ import {
   resetPassword,
   googleAuth,
   logout,
-  verifyAdmin,
 } from "../controllers/auth.controller.js";
 import multerUpload from "../middlewares/multer.middleware.js";
 
@@ -19,6 +18,5 @@ router.post("/verify-otp", verifyOTP);
 router.post("/reset-password", resetPassword);
 router.post("/google-auth", multerUpload.single("profilePicture"), googleAuth);
 router.post("/logout", logout);
-router.get("/verify-admin", verifyAdmin);
 
 export default router;

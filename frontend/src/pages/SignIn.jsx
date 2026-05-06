@@ -220,7 +220,7 @@ const SignIn = () => {
               <p className="text-center text-gray-600 dark:text-gray-300 text-sm mt-6">
                 Login As Admin{" "}
                 <Link
-                  to="/admin/signin"
+                  to="http://localhost:5174"
                   className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
                 >
                   Here

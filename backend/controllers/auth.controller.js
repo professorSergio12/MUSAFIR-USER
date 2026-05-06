@@ -216,37 +216,3 @@ export const logout = async (req, res, next) => {
     .status(200)
     .json({ message: "Logged out successfully" });
 };
-
-export const verifyAdmin = async (req, res, next) => {
-  try {
-    const token = req.cookies.access_token;
-    if (!token) {
-      return next(errorHandler(401, "Unauthorized - No token provided"));
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    
-    if (!user) {
-      return next(errorHandler(404, "User not found"));
-    }
-
-    if (user.role !== "admin") {
-      return next(errorHandler(403, "You are not admin"));
-    }
-
-    const { password: pwd, ...rest } = user._doc;
-    res.status(200).json({
-      ...rest,
-      role: user.role,
-    });
-  } catch (error) {
-    if (error.name === "JsonWebTokenError") {
-      return next(errorHandler(401, "Invalid token"));
-    }
-    if (error.name === "TokenExpiredError") {
-      return next(errorHandler(401, "Token expired"));
-    }
-    next(error);
-  }
-};
