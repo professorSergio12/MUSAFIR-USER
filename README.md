@@ -3,28 +3,28 @@
 Musafir is a comprehensive, full-stack tour and travel application designed to provide users with an immersive experience for exploring and booking travel packages. The platform features a modern React-based frontend, a robust Node.js backend, and a dedicated worker service for handling background tasks, all containerized with Docker for seamless development and deployment.
 
 **Key Features**
-**User Authentication**: Secure sign-up, sign-in, and logout functionality, including password reset via OTP and Google OAuth integration.
-**Package Discovery**: Browse a wide array of travel packages, including a curated list of recommended tours. Filter and search through all available options.
-**Detailed Package Views**: Access in-depth information for each package, including day-by-day itineraries, available hotels, and meal plan options.
-**Dynamic Pricing**: The total package price is calculated dynamically based on user selections for hotels, room types, and food plans.
-**Payment Integration**: Secure payment processing for bookings is handled via Razorpay.
-**User Dashboard**: A personalized dashboard for users to manage their profile, view booking history, submit travel photos to a personal gallery, and post reviews.
-**Community Gallery**: A public gallery showcasing stunning travel photos uploaded by users.
-Reviews and Ratings: Users can submit reviews and ratings for packages they have booked.
-**Responsive Design**: A mobile-first, responsive interface built with Tailwind CSS and Flowbite for a great user experience on any device.
+- **User Authentication**: Secure sign-up, sign-in, and logout functionality, including password reset via OTP and Google OAuth integration.
+- **Package Discovery**: Browse a wide array of travel packages, including a curated list of recommended tours. Filter and search through all available options.
+- **Detailed Package Views**: Access in-depth information for each package, including day-by-day itineraries, available hotels, and meal plan options.
+- **Dynamic Pricing**: The total package price is calculated dynamically based on user selections for hotels, room types, and food plans.
+- **Payment Integration**: Secure payment processing for bookings is handled via Razorpay.
+- **User Dashboard**: A personalized dashboard for users to manage their profile, view booking history, submit travel photos to a personal gallery, and post reviews.
+- **Community Gallery**: A public gallery showcasing stunning travel photos uploaded by users.
+- **Reviews and Ratings**: Users can submit reviews and ratings for packages they have booked.
+- **Responsive Design**: A mobile-first, responsive interface built with Tailwind CSS and Flowbite for a great user experience on any device.
 
 **Architecture**
 Musafir is built with a modern, scalable architecture, separating concerns into distinct services within a monorepo structure.
 
-Frontend: A responsive client application built with React and Vite. State management is handled by Redux Toolkit and redux-persist, while asynchronous operations and server state are managed by TanStack Query. The UI is styled with Tailwind CSS and Flowbite-React.
+* Frontend: A responsive client application built with React and Vite. Redux Toolkit and redux-persist handle state management, while TanStack Query manages asynchronous operations and server state. The UI is styled with Tailwind CSS and Flowbite-React.
 
-Backend: A RESTful API powered by Node.js and Express. It uses MongoDB with Mongoose for data modeling and persistence. Authentication is managed using JWT and bcryptjs. The backend integrates with third-party services like Cloudinary for image storage and Razorpay for payment processing. Redis is used for caching API responses and managing OTPs.
+* Backend: A RESTful API powered by Node.js and Express. It uses MongoDB with Mongoose for data modeling and persistence. Authentication is managed using JWT and bcryptjs. The backend integrates with third-party services like Cloudinary for image storage and Razorpay for payment processing. Redis is used for caching API responses and managing OTPs.
 
-Worker Service: A separate Node.js process that handles background jobs using BullMQ. It processes queues for sending emails (e.g., welcome messages, password reset OTPs) via Nodemailer, ensuring the main API remains fast and responsive.
+* Worker Service: A separate Node.js process that handles background jobs using BullMQ. It processes queues for sending emails (e.g., welcome messages, password reset OTPs) via Nodemailer, ensuring the main API remains fast and responsive.
 
-Containerization: The entire application stack (frontend, backend, worker, Redis) is containerized using Docker and orchestrated with Docker Compose, allowing for consistent environments from development to production.
+* Containerization: The entire application stack (frontend, backend, worker, Redis) is containerized using Docker and orchestrated with Docker Compose, allowing for consistent environments from development to production.
 
-CI/CD: The repository includes GitHub Actions workflows (.github/workflows) for automatically building Docker images, pushing them to Docker Hub, and deploying the application to an EC2 instance.
+* CI/CD: The repository includes GitHub Actions workflows (.github/workflows) for automatically building Docker images, pushing them to Docker Hub, and deploying the application to an EC2 instance.
 
 **Getting Started**
 To run this project locally, you will need Docker and Docker Compose installed.
@@ -39,6 +39,7 @@ cd MUSAFIR-USER
 Create a .env file in the root directory of the project. This file is essential for providing credentials and configuration for all services. Add the following variables, replacing the placeholder values with your own keys:
 
 **# MongoDB Connection**
+
 ```
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster-url>/musafir?retryWrites=true&w=majority
 ```
@@ -67,11 +68,11 @@ RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 ```
 
 **# Nodemailer Credentials (for the worker service)**
-
 EMAIL_USER=your_gmail_address@gmail.com
 MAIL_PASS=your_gmail_app_password
 
-**# --- Frontend Build-Time Variables ---**
+
+# --- Frontend Build-Time Variables ---
 
 **# Firebase Credentials**
 ```
