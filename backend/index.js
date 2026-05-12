@@ -49,7 +49,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/gallery", galleryImgUploadRoutes);
 
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.send("Hello World");
 });
 
