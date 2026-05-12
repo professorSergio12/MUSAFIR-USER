@@ -33,6 +33,7 @@ app.use(
       "http://localhost:5174",
       "https://musafir-user-frontend.vercel.app",
       "http://54.91.196.165",
+      "https://musafir-tour-travel.duckdns.org",
     ],
     credentials: true,
   })
