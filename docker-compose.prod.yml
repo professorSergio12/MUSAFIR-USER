@@ -6,6 +6,9 @@ services:
     image: ${DOCKERHUB_USERNAME}/musafir-frontend:latest
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
     restart: unless-stopped
@@ -19,10 +22,6 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-    depends_on:
-      redis:
-        condition: service_healthy
     restart: unless-stopped
 
   worker:
@@ -31,24 +30,4 @@ services:
       - .env
     environment:
       NODE_ENV: production
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-    depends_on:
-      redis:
-        condition: service_healthy
     restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    restart: unless-stopped
-
-volumes:
-  redis_data:

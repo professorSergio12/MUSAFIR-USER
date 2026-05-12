@@ -20,8 +20,6 @@ jobs:
   build-and-push:
     name: Build and push to Docker Hub
     runs-on: ubuntu-latest
-    outputs:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
 
     steps:
       - name: Checkout
@@ -45,16 +43,23 @@ jobs:
             --build-arg VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID }} \
             -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_FRONTEND }}:latest \
             -f frontend/Dockerfile ./frontend
+
           docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_FRONTEND }}:latest
 
       - name: Build and push backend
         run: |
-          docker build -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_BACKEND }}:latest -f backend/Dockerfile ./backend
+          docker build \
+            -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_BACKEND }}:latest \
+            -f backend/Dockerfile ./backend
+
           docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_BACKEND }}:latest
 
       - name: Build and push worker
         run: |
-          docker build -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_WORKER }}:latest -f worker-server/Dockerfile ./worker-server
+          docker build \
+            -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_WORKER }}:latest \
+            -f worker-server/Dockerfile ./worker-server
+
           docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_WORKER }}:latest
 
   deploy:
@@ -78,12 +83,34 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
             set -e
-            cd ${{ secrets.EC2_APP_DIR }}
-            pwd
-            ls -la
-            git pull origin main || true
-            echo '${{ secrets.DOCKERHUB_TOKEN }}' | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+            APP_DIR=${{ secrets.EC2_APP_DIR }}
+            REPO_NAME=MUSAFIR-USER
+            REPO_URL=https://github.com/professorSergio12/MUSAFIR-USER.git
+
+            mkdir -p \$APP_DIR
+            cd \$APP_DIR
+
+            if [ ! -d \"\$REPO_NAME\" ]; then
+              echo 'Repository not found. Cloning...'
+              git clone \$REPO_URL
+            else
+              echo 'Repository already exists. Pulling latest code...'
+            fi
+
+            cd \$REPO_NAME
+
+            git pull origin main
+
+            echo '${{ secrets.DOCKERHUB_TOKEN }}' | docker login \
+              -u ${{ secrets.DOCKERHUB_USERNAME }} \
+              --password-stdin
+
             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+
             docker compose -f docker-compose.prod.yml pull
+
+            docker compose -f docker-compose.prod.yml down
+
             docker compose -f docker-compose.prod.yml up -d
           "

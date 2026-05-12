@@ -32,7 +32,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "https://musafir-user-frontend.vercel.app",
-      "http://13.49.21.179",
+      "http://54.91.196.165",
     ],
     credentials: true,
   })
