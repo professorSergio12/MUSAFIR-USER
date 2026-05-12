@@ -36,12 +36,12 @@ jobs:
             df -h
 
             if [ ! -d "MUSAFIR-Exommerce" ]; then
-              echo "Cloning repository (aws-server branch)..."
-              git clone -b aws-server https://github.com/professorSergio12/MUSAFIR-Exommerce.git
+              echo "Cloning repository (main branch)..."
+              git clone https://github.com/professorSergio12/MUSAFIR-Exommerce.git
             else
               echo "Updating repository..."
               cd MUSAFIR-Exommerce
-              git pull origin aws-server
+              git pull origin main
               cd ..
             fi
 
