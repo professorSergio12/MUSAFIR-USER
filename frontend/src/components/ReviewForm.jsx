@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { useCreateReview } from "../hooks/useReview";
 import { StarIcon } from "@heroicons/react/24/solid";
-import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
+import {
+  StarIcon as StarOutlineIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
 
+/** Review modal — app is dark-only; no light theme branch. */
 const ReviewForm = ({ packageId, bookingId, onClose, packageName }) => {
   const [formData, setFormData] = useState({
     rating: 0,
@@ -35,7 +39,6 @@ const ReviewForm = ({ packageId, bookingId, onClose, packageName }) => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -91,142 +94,192 @@ const ReviewForm = ({ packageId, bookingId, onClose, packageName }) => {
       rating: formData.rating,
       title: formData.title.trim(),
       review: formData.review.trim(),
-      // images: [] // Add images support later with Cloudinary upload
     };
 
     submitReview(reviewData);
   };
 
+  const ratingLabels = ["", "Poor", "Fair", "Good", "Very good", "Excellent"];
+  const displayRating = hoveredRating || formData.rating;
+
+  const inputClass =
+    "review-modal-scroll w-full rounded-xl border border-slate-600 bg-slate-950 px-4 py-3 text-slate-100 shadow-inner " +
+    "placeholder:text-slate-400 selection:bg-red-900/80 selection:text-white transition " +
+    "focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2 focus:ring-offset-slate-900";
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Write a Review
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 cursor-pointer hover:text-gray-600 dark:text-gray-300 text-2xl"
-          >
-            ×
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Package Name */}
-          {packageName && (
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Reviewing:
-              </p>
-              <p className="font-semibold text-gray-900 dark:text-white">
-                {packageName}
-              </p>
-            </div>
-          )}
-
-          {/* Rating */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rating <span className="text-red-500">*</span>
-            </label>
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => handleRatingClick(star)}
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                  className="focus:outline-none cursor-pointer"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-slate-900 text-slate-100 shadow-2xl ring-1 ring-white/10"
+        role="dialog"
+        aria-labelledby="review-modal-title"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative overflow-hidden bg-gradient-to-br from-red-800 via-rose-800 to-red-950 px-6 py-5">
+          <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/5" />
+          <div className="pointer-events-none absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-black/20" />
+          <div className="relative z-10 flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-black/20">
+                <SparklesIcon className="h-6 w-6 text-amber-200" aria-hidden />
+              </div>
+              <div className="min-w-0">
+                <h2
+                  id="review-modal-title"
+                  className="text-xl font-bold tracking-tight text-white sm:text-2xl"
                 >
-                  {hoveredRating >= star || formData.rating >= star ? (
-                    <StarIcon className="w-8 h-8 text-yellow-400" />
-                  ) : (
-                    <StarOutlineIcon className="w-8 h-8 text-gray-300" />
-                  )}
-                </button>
-              ))}
-              {formData.rating > 0 && (
-                <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
-                  {formData.rating} out of 5
-                </span>
-              )}
+                  Share your trip
+                </h2>
+                <p className="mt-0.5 text-sm text-slate-200">
+                  Honest reviews help other travellers choose better.
+                </p>
+              </div>
             </div>
-            {errors.rating && (
-              <p className="mt-1 text-sm text-red-600">{errors.rating}</p>
-            )}
-          </div>
-
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Review Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Give your review a title"
-              maxLength={100}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              {formData.title.length}/100 characters
-            </p>
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-            )}
-          </div>
-
-          {/* Review Text */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Review <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              name="review"
-              value={formData.review}
-              onChange={handleChange}
-              placeholder="Share your experience with this package..."
-              rows={6}
-              maxLength={1000}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              {formData.review.length}/1000 characters
-            </p>
-            {errors.review && (
-              <p className="mt-1 text-sm text-red-600">{errors.review}</p>
-            )}
-          </div>
-
-          {/* Images - Coming Soon */}
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Photos (Optional)
-            </label>
-            <p className="text-sm text-gray-500 italic">
-              Image upload feature coming soon!
-            </p>
-          </div> */}
-
-          {/* Submit Buttons */}
-          <div className="flex gap-4 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border cursor-pointer border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-2xl leading-none text-white transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex max-h-[min(78vh,640px)] flex-col bg-slate-900 text-slate-100"
+        >
+          <div className="review-modal-scroll max-h-[min(52vh,420px)] space-y-5 overflow-x-auto overflow-y-auto overscroll-contain px-6 py-6">
+            {packageName ? (
+              <div className="rounded-xl border border-red-500/40 bg-slate-800/80 p-4 ring-1 ring-white/5">
+                <p className="text-xs font-bold uppercase tracking-wide text-amber-300/90">
+                  Reviewing package
+                </p>
+                <p className="mt-1.5 text-base font-semibold leading-snug text-white">
+                  {packageName}
+                </p>
+              </div>
+            ) : null}
+
+            <div>
+              <label
+                htmlFor="review-rating"
+                className="mb-3 flex items-baseline justify-between text-sm font-semibold text-slate-200"
+              >
+                <span id="review-rating">
+                  Overall rating <span className="text-red-400">*</span>
+                </span>
+                {displayRating > 0 ? (
+                  <span className="text-sm font-medium text-amber-300">
+                    {ratingLabels[displayRating]}
+                  </span>
+                ) : null}
+              </label>
+              <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => handleRatingClick(star)}
+                    onMouseEnter={() => setHoveredRating(star)}
+                    onMouseLeave={() => setHoveredRating(0)}
+                    className="rounded-lg p-1.5 transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    aria-label={`Rate ${star} out of 5`}
+                  >
+                    {hoveredRating >= star || formData.rating >= star ? (
+                      <StarIcon className="h-9 w-9 text-amber-400 sm:h-10 sm:w-10" />
+                    ) : (
+                      <StarOutlineIcon className="h-9 w-9 text-slate-500 sm:h-10 sm:w-10" />
+                    )}
+                  </button>
+                ))}
+                {formData.rating > 0 ? (
+                  <span className="ml-1 text-sm font-medium text-slate-400">
+                    {formData.rating} / 5
+                  </span>
+                ) : null}
+              </div>
+              {errors.rating ? (
+                <p className="mt-2 text-sm font-medium text-red-400">
+                  {errors.rating}
+                </p>
+              ) : null}
+            </div>
+
+            <div>
+              <label
+                htmlFor="review-title"
+                className="mb-2 block text-sm font-semibold text-slate-200"
+              >
+                Review title <span className="text-red-400">*</span>
+              </label>
+              <input
+                id="review-title"
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="e.g. Smooth booking, amazing guides"
+                maxLength={100}
+                className={inputClass}
+              />
+              <p className="mt-1.5 text-right text-xs font-medium text-slate-400">
+                {formData.title.length} / 100
+              </p>
+              {errors.title ? (
+                <p className="mt-1 text-sm font-medium text-red-400">
+                  {errors.title}
+                </p>
+              ) : null}
+            </div>
+
+            <div>
+              <label
+                htmlFor="review-body"
+                className="mb-2 block text-sm font-semibold text-slate-200"
+              >
+                Your experience <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                id="review-body"
+                name="review"
+                value={formData.review}
+                onChange={handleChange}
+                placeholder="What did you love? Anything others should know?"
+                rows={5}
+                maxLength={1000}
+                className={`${inputClass} resize-none break-words leading-relaxed`}
+              />
+              <p className="mt-1.5 text-right text-xs font-medium text-slate-400">
+                {formData.review.length} / 1000
+              </p>
+              {errors.review ? (
+                <p className="mt-1 text-sm font-medium text-red-400">
+                  {errors.review}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-slate-700 bg-slate-950 px-6 py-4 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-center text-sm font-semibold text-slate-100 transition hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 sm:w-auto sm:min-w-[120px]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 px-4 py-2 bg-red-600 cursor-pointer text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/40 transition hover:from-red-500 hover:to-rose-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:min-w-[160px]"
             >
-              {isPending ? "Submitting..." : "Submit Review"}
+              {isPending ? "Submitting…" : "Submit review"}
             </button>
           </div>
         </form>

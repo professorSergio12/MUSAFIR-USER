@@ -1,6 +1,31 @@
 @import "tailwindcss";
 @import "flowbite";
 
+/* Dark-themed scrollbars (vertical + horizontal + corner) — e.g. review modal */
+.review-modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #0f172a;
+}
+.review-modal-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.review-modal-scroll::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 4px;
+}
+.review-modal-scroll::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 9999px;
+  border: 2px solid #0f172a;
+}
+.review-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+.review-modal-scroll::-webkit-scrollbar-corner {
+  background: #0f172a;
+}
+
 /* Hide scrollbars for horizontal scrolling */
 .scrollbar-hide {
   -ms-overflow-style: none; /* Internet Explorer 10+ */

@@ -8,7 +8,8 @@
     "start": "node index.js",
     "redis": "node queues/email.queue.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node scripts/seedDatabase.js"
+    "seed": "node scripts/seedDatabase.js",
+    "seed:budget": "node scripts/seedBudgetPackages.js"
   },
   "author": "",
   "license": "ISC",

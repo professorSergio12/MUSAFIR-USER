@@ -92,29 +92,35 @@ const UserPost = () => {
     });
   };
 
+  /** Same field styling as ReviewForm — dark surface, light text, visible placeholders. */
+  const fieldClass =
+    "review-modal-scroll w-full rounded-xl border border-slate-600 bg-slate-950 px-4 py-3 text-slate-100 shadow-inner " +
+    "placeholder:text-slate-400 selection:bg-red-900/80 selection:text-white transition " +
+    "focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2 focus:ring-offset-slate-900";
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-slate-950 p-6 md:p-8">
+      <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight text-white">
             Upload Tour Photo
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-slate-400">
             Share your amazing travel moments with the community
           </p>
         </div>
 
-        {/* Upload Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
+        {/* Upload Form — dark card aligned with review modal */}
+        <div className="rounded-2xl bg-slate-900 p-6 text-slate-100 shadow-2xl ring-1 ring-white/10 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Image Upload Section */}
             <div>
               <label
                 htmlFor="image-input"
-                className="block text-sm font-medium text-white-700 mb-2"
+                className="mb-2 block text-sm font-semibold text-slate-200"
               >
-                Select Image <span className="text-red-500">*</span>
+                Select Image <span className="text-red-400">*</span>
               </label>
               <div className="mt-2">
                 {imageData.preview ? (
@@ -122,7 +128,7 @@ const UserPost = () => {
                     <img
                       src={imageData.preview}
                       alt="Preview"
-                      className="w-full h-64 object-cover rounded-lg border-2 border-gray-200"
+                      className="h-64 w-full rounded-xl border border-slate-600 object-cover"
                     />
                     <button
                       type="button"
@@ -148,12 +154,12 @@ const UserPost = () => {
                 ) : (
                   <label
                     htmlFor="image-input"
-                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-600 bg-slate-950/80 transition-colors hover:border-slate-500 hover:bg-slate-800/60"
                   >
                     <span className="sr-only">Upload image file</span>
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <div className="flex flex-col items-center justify-center pb-6 pt-5">
                       <svg
-                        className="w-12 h-12 mb-4 text-gray-400"
+                        className="mb-4 h-12 w-12 text-slate-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -166,11 +172,13 @@ const UserPost = () => {
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
-                      <p className="mb-2 text-sm text-gray-300">
-                        <span className="font-semibold">Click to upload</span>{" "}
+                      <p className="mb-2 text-sm text-slate-300">
+                        <span className="font-semibold text-slate-100">
+                          Click to upload
+                        </span>{" "}
                         or drag and drop
                       </p>
-                      <p className="text-xs text-gray-300">
+                      <p className="text-xs text-slate-400">
                         PNG, JPG, GIF up to 5MB
                       </p>
                     </div>
@@ -190,7 +198,7 @@ const UserPost = () => {
             <div>
               <label
                 htmlFor="caption"
-                className="block text-sm font-medium text-white-700 mb-2"
+                className="mb-2 block text-sm font-semibold text-slate-200"
               >
                 Caption
               </label>
@@ -200,7 +208,7 @@ const UserPost = () => {
                 value={form.caption}
                 onChange={handleChange}
                 placeholder="Write a caption for your photo..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
+                className={fieldClass}
               />
             </div>
 
@@ -208,7 +216,7 @@ const UserPost = () => {
             <div>
               <label
                 htmlFor="location"
-                className="block text-sm font-medium text-white-700 mb-2"
+                className="mb-2 block text-sm font-semibold text-slate-200"
               >
                 Location
               </label>
@@ -218,7 +226,7 @@ const UserPost = () => {
                 value={form.location}
                 onChange={handleChange}
                 placeholder="e.g., Paris, France"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
+                className={fieldClass}
               />
             </div>
 
@@ -226,10 +234,12 @@ const UserPost = () => {
             <div>
               <label
                 htmlFor="tags"
-                className="block text-sm font-medium text-white-700 mb-2"
+                className="mb-2 block text-sm font-semibold text-slate-200"
               >
                 Tags{" "}
-                <span className="text-gray-200 text-xs">(comma-separated)</span>
+                <span className="text-xs font-normal text-slate-400">
+                  (comma-separated)
+                </span>
               </label>
               <input
                 type="text"
@@ -237,9 +247,9 @@ const UserPost = () => {
                 value={form.tags}
                 onChange={handleChange}
                 placeholder="e.g., adventure, mountains, sunset"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
+                className={fieldClass}
               />
-              <p className="mt-1 text-xs text-white-500">
+              <p className="mt-1 text-xs text-slate-400">
                 Separate multiple tags with commas
               </p>
             </div>
@@ -247,10 +257,10 @@ const UserPost = () => {
             {/* Message Display */}
             {message.text && (
               <div
-                className={`px-4 py-3 rounded-lg flex items-center gap-2 ${
+                className={`flex items-center gap-2 rounded-xl border px-4 py-3 ${
                   message.type === "success"
-                    ? "bg-green-50 border border-green-200 text-green-800"
-                    : "bg-red-50 border border-red-200 text-red-800"
+                    ? "border-green-700/50 bg-green-950/60 text-green-200"
+                    : "border-red-700/50 bg-red-950/60 text-red-200"
                 }`}
               >
                 {message.type === "success" ? (
@@ -291,7 +301,7 @@ const UserPost = () => {
               <button
                 type="submit"
                 disabled={isPending || !imageData.file}
-                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-6 py-3 font-semibold text-white shadow-lg shadow-red-900/40 transition hover:from-red-500 hover:to-rose-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-45"
               >
                 {isPending ? (
                   <>

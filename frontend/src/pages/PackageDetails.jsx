@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePackageBySlug } from "../hooks/usePackages";
 import { useCreateOrder, useVerifyPayment } from "../hooks/usePayment";
 
@@ -8,6 +9,7 @@ const PackageDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const user = useSelector((state) => state.user.currentUser);
   const { data: packageData, isLoading, error } = usePackageBySlug(slug);
   const [selectedHotel, setSelectedHotel] = useState(null);
@@ -152,8 +154,9 @@ const PackageDetails = () => {
             });
 
             if (verifyResponse.success) {
-              alert("Payment successful! Booking confirmed.");
-              navigate("/booking-success");
+              void queryClient.invalidateQueries({ queryKey: ["user-bookings"] });
+              alert("Payment successful! Your booking is in My Bookings.");
+              navigate("/profile?tab=bookings", { replace: true });
             } else {
               alert("Payment verification failed. Please contact support.");
             }
@@ -358,12 +361,14 @@ const PackageDetails = () => {
                     Choose Your Hotel
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    {packageData.availableHotels.map((hotel, index) => (
+                    {packageData.availableHotels.map((hotel, index) => {
+                      const isHotelSelected = selectedHotel?._id === hotel._id;
+                      return (
                       <div
                         key={hotel._id || index}
                         className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                          selectedHotel?._id === hotel._id
-                            ? "border-red-500 bg-red-50"
+                          isHotelSelected
+                            ? "border-red-500 bg-red-50 ring-2 ring-red-200/80 dark:bg-red-50"
                             : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
                         }`}
                         onClick={() => {
@@ -374,7 +379,13 @@ const PackageDetails = () => {
                         }}
                       >
                         <div className="flex items-start justify-between mb-3">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                          <h3
+                            className={`font-semibold ${
+                              isHotelSelected
+                                ? "text-gray-900"
+                                : "text-gray-900 dark:text-white"
+                            }`}
+                          >
                             {hotel.name}
                           </h3>
                           <span
@@ -389,18 +400,30 @@ const PackageDetails = () => {
                             {hotel.tier}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                        <p
+                          className={`text-sm mb-2 ${
+                            isHotelSelected
+                              ? "text-gray-800"
+                              : "text-gray-600 dark:text-gray-300"
+                          }`}
+                        >
                           {hotel.city}, {hotel.country}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                        <p
+                          className={`text-sm mb-3 ${
+                            isHotelSelected
+                              ? "text-gray-700"
+                              : "text-gray-600 dark:text-gray-300"
+                          }`}
+                        >
                           {hotel.description}
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-bold text-red-600">
                             ₹{hotel.pricePerNight?.toLocaleString()}/night
                           </span>
-                          {selectedHotel?._id === hotel._id && (
-                            <span className="text-green-600 text-sm font-medium">
+                          {isHotelSelected && (
+                            <span className="text-green-700 text-sm font-medium">
                               ✓ Selected
                             </span>
                           )}
@@ -413,7 +436,8 @@ const PackageDetails = () => {
                           />
                         )}
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
 
                   {/* Room Type Selection */}
@@ -425,31 +449,47 @@ const PackageDetails = () => {
                           Choose Room Type
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                          {selectedHotel.roomTypes.map((roomType, index) => (
+                          {selectedHotel.roomTypes.map((roomType, index) => {
+                            const isRoomSelected =
+                              selectedRoomType?.name === roomType.name;
+                            return (
                             <div
                               key={index}
                               className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                                selectedRoomType?.name === roomType.name
-                                  ? "border-red-500 bg-red-50"
+                                isRoomSelected
+                                  ? "border-red-500 bg-red-50 ring-2 ring-red-200/80 dark:bg-red-50"
                                   : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
                               }`}
                               onClick={() => setSelectedRoomType(roomType)}
                             >
-                              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                              <h4
+                                className={`font-semibold mb-2 ${
+                                  isRoomSelected
+                                    ? "text-gray-900"
+                                    : "text-gray-900 dark:text-white"
+                                }`}
+                              >
                                 {roomType.name}
                               </h4>
-                              <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <p
+                                className={`text-sm ${
+                                  isRoomSelected
+                                    ? "text-gray-800"
+                                    : "text-gray-600 dark:text-gray-300"
+                                }`}
+                              >
                                 {roomType.surcharge === 0
                                   ? "Base price"
                                   : `+₹${roomType.surcharge.toLocaleString()}/night`}
                               </p>
-                              {selectedRoomType?.name === roomType.name && (
-                                <span className="text-green-600 text-sm font-medium">
+                              {isRoomSelected && (
+                                <span className="text-green-700 text-sm font-medium">
                                   ✓ Selected
                                 </span>
                               )}
                             </div>
-                          ))}
+                          );
+                          })}
                         </div>
                       </div>
                     )}
@@ -464,18 +504,26 @@ const PackageDetails = () => {
                     Choose Your Meal Plan
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    {packageData.availableFoodOptions.map((food, index) => (
+                    {packageData.availableFoodOptions.map((food, index) => {
+                      const isFoodSelected = selectedFoodOption?._id === food._id;
+                      return (
                       <div
                         key={food._id || index}
                         className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                          selectedFoodOption?._id === food._id
-                            ? "border-red-500 bg-red-50"
+                          isFoodSelected
+                            ? "border-red-500 bg-red-50 ring-2 ring-red-200/80 dark:bg-red-50"
                             : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
                         }`}
                         onClick={() => setSelectedFoodOption(food)}
                       >
                         <div className="flex items-start justify-between mb-3">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                          <h3
+                            className={`font-semibold ${
+                              isFoodSelected
+                                ? "text-gray-900"
+                                : "text-gray-900 dark:text-white"
+                            }`}
+                          >
                             {food.name}
                           </h3>
                           <span className="text-lg font-bold text-red-600">
@@ -484,7 +532,13 @@ const PackageDetails = () => {
                               : `+₹${food.surchargePerDay?.toLocaleString()}/day`}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                        <p
+                          className={`text-sm mb-3 ${
+                            isFoodSelected
+                              ? "text-gray-700"
+                              : "text-gray-600 dark:text-gray-300"
+                          }`}
+                        >
                           {food.description}
                         </p>
                         <div className="flex flex-wrap gap-2 mb-3">
@@ -504,13 +558,14 @@ const PackageDetails = () => {
                             </span>
                           )}
                         </div>
-                        {selectedFoodOption?._id === food._id && (
-                          <span className="text-green-600 text-sm font-medium">
+                        {isFoodSelected && (
+                          <span className="text-green-700 text-sm font-medium">
                             ✓ Selected
                           </span>
                         )}
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 </div>
               )}

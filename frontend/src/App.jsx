@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./features/Navbar";
 import Home from "./pages/Home";
 import Packages from "./components/RecommendedPackages";
@@ -32,6 +32,10 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/profile" element={<User />} />
+        <Route
+          path="/booking-success"
+          element={<Navigate to="/profile?tab=bookings" replace />}
+        />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/about" element={<About />} />
       </Routes>

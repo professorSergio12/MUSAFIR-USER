@@ -61,10 +61,11 @@ export const verifyPayment = async (req, res, next) => {
       return next(errorHandler(400, "Invalid payment signature"));
     }
 
+    // JWT payload uses `id` (see auth.controller + verify middleware), not `_id`
     const booking = await Booking.create({
       packageId,
       amount,
-      user: req.user?._id || null,
+      user: req.user?.id ?? null,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       status: "Confirmed",
